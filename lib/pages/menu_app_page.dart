@@ -1,5 +1,6 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
+import 'package:list_app/components/item_list.dart';
 import '../components/custom_app_bar.dart';
 import '../components/custom_button.dart';
 import '../theme/app_colors.dart';
@@ -46,13 +47,16 @@ class MenuPage extends StatelessWidget {
               onPressed: () {},
             ),
           ),
-        )
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: color,
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          child: ListView.builder(
+            itemBuilder: (context, index) {
+              return ItemList(
+                title: "Lista teste",
+                isImportant: true,
+              );
+            }
           ),
         ),
       ],

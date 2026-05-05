@@ -12,6 +12,7 @@ class AppColors {
   static const Color surface = Colors.white;
   static const Color error = Color(0xFFB00020);
 
+
   // Cores de Texto
   static const Color onPrimary = Colors.white;
   static const Color onSecondary = Colors.black;
