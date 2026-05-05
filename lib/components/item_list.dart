@@ -6,12 +6,14 @@ class ItemList extends StatelessWidget {
   final String title;
   final Color? backgroundColor;
   final bool isImportant;
+  final bool isDone;
 
   const ItemList({
     super.key,
     required this.title,
     this.backgroundColor,
     this.isImportant = false,
+    this.isDone = false,
   });
 
   @override
@@ -32,10 +34,11 @@ class ItemList extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: AppColors.onBackground,
+                      decoration: isDone ? TextDecoration.lineThrough : null,
                     ),
                   ),
                   if (isImportant)
