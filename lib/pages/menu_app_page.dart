@@ -2,6 +2,7 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:list_app/components/item_list.dart';
+import 'package:list_app/theme/router/router.gr.dart';
 import '../components/custom_app_bar.dart';
 import '../components/custom_button.dart';
 import '../theme/app_colors.dart';
@@ -19,13 +20,13 @@ class MenuAppPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => MenuAppCubit(),
-      child: const Scaffold(
+      child: Scaffold(
         appBar: CustomAppBar(
           title: 'Menu App',
           actions: [
             IconButton(
-              onPressed: null,
-              icon: Icon(Icons.notifications),
+              onPressed: () => context.router.popAndPush(const WelcomeRoute()),
+              icon: const Icon(Icons.close),
             ),
           ],
         ),
@@ -101,32 +102,27 @@ class _MenuPageState extends State<MenuPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: AppColors.onBackground, width: 2),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-              child: CustomButton(
-                title: 'Adicionar',
-                icon: Icons.add,
-                backgroundColor: AppColors.secondaryVariant,
-                onPressed: () async {
-                  final newTask = Task(
-                    title: 'Nova Tarefa',
-                    description: 'Insira a descrição aqui...',
-                    dueDate: DateTime.now(),
-                    isImportant: false,
-                    isDone: false,
-                    category: 'Geral',
-                  );
-                  final id = await _dbHelper.insertTask(newTask);
-                  newTask.id = id;
-                  if (context.mounted) {
-                    context.read<MenuAppCubit>().showTaskEdit(newTask);
-                  }
-                },
-              ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+            child: CustomButton(
+              title: 'Adicionar',
+              icon: Icons.add,
+              backgroundColor: AppColors.primary,
+              onPressed: () async {
+                final newTask = Task(
+                  title: 'Nova Tarefa',
+                  description: 'Insira a descrição aqui...',
+                  dueDate: DateTime.now(),
+                  isImportant: false,
+                  isDone: false,
+                  category: 'Geral',
+                );
+                final id = await _dbHelper.insertTask(newTask);
+                newTask.id = id;
+                if (context.mounted) {
+                  context.read<MenuAppCubit>().showTaskEdit(newTask);
+                }
+              },
             ),
           ),
           Expanded(
