@@ -78,6 +78,18 @@ class _MenuPageState extends State<MenuPage> {
               });
             }
             break;
+          case MenuAppDialog.taskEdit:
+            if (!isDialogOpen) {
+              isDialogOpen = true;
+              AppDialogs.showTaskEditDialog(
+                context,
+                state.selectedTask!,
+                cubit,
+              ).then((_) {
+                _loadTasks();
+              });
+            }
+            break;
           case MenuAppDialog.none:
             if (isDialogOpen) {
               isDialogOpen = false;
@@ -111,7 +123,7 @@ class _MenuPageState extends State<MenuPage> {
                   final id = await _dbHelper.insertTask(newTask);
                   newTask.id = id;
                   if (context.mounted) {
-                    context.read<MenuAppCubit>().showTaskDetails(newTask);
+                    context.read<MenuAppCubit>().showTaskEdit(newTask);
                   }
                 },
               ),
@@ -131,9 +143,8 @@ class _MenuPageState extends State<MenuPage> {
                         context.read<MenuAppCubit>().showTaskDetails(task);
                       },
                       child: ItemList(
-                        title: task.title,
-                        isImportant: task.isImportant,
-                        isDone: task.isDone,
+                        currentTask: task,
+                        backgroundColor: task.isDone ? Colors.grey : null,
                       ),
                     ),
                   );

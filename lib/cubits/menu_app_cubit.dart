@@ -18,6 +18,14 @@ class MenuAppCubit extends Cubit<MenuAppState> {
     ));
   }
 
+  void showTaskEdit(Task task) {
+    if (state.dialogType != MenuAppDialog.none && state.dialogType != MenuAppDialog.taskEdit) closeDialog();
+    emit(state.copyWith(
+      dialogType: MenuAppDialog.taskEdit,
+      selectedTask: task,
+    ));
+  }
+
   void closeDialog() {
     _debounceTimer?.cancel();
     emit(state.copyWith(

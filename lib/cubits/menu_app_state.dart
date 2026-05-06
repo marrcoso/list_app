@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import '../models/task.dart';
 
-enum MenuAppDialog { none, taskDetails }
+enum MenuAppDialog { none, taskDetails, taskEdit }
 
 class MenuAppState extends Equatable {
   final MenuAppDialog dialogType;

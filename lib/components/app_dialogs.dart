@@ -6,8 +6,7 @@ import '../cubits/menu_app_cubit.dart';
 import '../cubits/menu_app_state.dart';
 
 class AppDialogs {
-  static Future<void> showTaskDetailsDialog(BuildContext context, Task task, MenuAppCubit cubit) async {
-    
+  static Future<void> showTaskEditDialog(BuildContext context, Task task, MenuAppCubit cubit) async {
     return showDialog(
       context: context,
       builder: (context) => BlocProvider.value(
@@ -31,7 +30,7 @@ class AppDialogs {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text(
-                            'Detalhes da Tarefa',
+                            'Editar Tarefa',
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -151,14 +150,122 @@ class AppDialogs {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 32),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () => cubit.closeDialog(),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                          ),
+                          child: const Text('Salvar e Fechar'),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  static Future<void> showTaskDetailsDialog(BuildContext context, Task task, MenuAppCubit cubit) async {
+    return showDialog(
+      context: context,
+      builder: (context) => BlocProvider.value(
+        value: cubit,
+        child: BlocBuilder<MenuAppCubit, MenuAppState>(
+          builder: (context, state) {
+            final currentTask = state.selectedTask ?? task;
+            
+            return Dialog(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.8,
+                height: MediaQuery.of(context).size.height * 0.8,
+                padding: const EdgeInsets.all(16),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           const Text(
-                            'Realizada',
+                            'Detalhes da Tarefa',
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.edit, color: AppColors.primary),
+                            onPressed: () => cubit.showTaskEdit(currentTask),
+                          ),
+                        ],
+                      ),
+                      const Divider(),
+                      Text(
+                        'ID: ${currentTask.id}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: AppColors.onBackground,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        currentTask.title,
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.onBackground,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      if (currentTask.isImportant)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.error.withValues(alpha: 0.1),
+                            border: Border.all(color: AppColors.error),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: const Text(
+                            'IMPORTANTE',
+                            style: TextStyle(color: AppColors.error, fontSize: 10, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      const SizedBox(height: 16),
+                      Text(
+                        currentTask.description,
+                        style: const TextStyle(fontSize: 16, color: AppColors.onBackground),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          const Icon(Icons.calendar_today, size: 16, color: AppColors.primary),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Data: ${currentTask.dueDate.day}/${currentTask.dueDate.month}/${currentTask.dueDate.year}',
+                            style: const TextStyle(fontSize: 14, color: AppColors.onBackground),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
+                      const Divider(),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Concluir Tarefa',
+                            style: TextStyle(
+                              fontSize: 18,
                               fontWeight: FontWeight.bold,
                               color: AppColors.onBackground,
                             ),
@@ -170,7 +277,7 @@ class AppDialogs {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 24),
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
