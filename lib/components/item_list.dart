@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:list_app/theme/app_colors.dart';
-import 'custom_button.dart';
 
 class ItemList extends StatelessWidget {
   final String title;
