@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:list_app/theme/app_colors.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -21,17 +22,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       centerTitle: true,
-      elevation: 2,
-      backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+      elevation: 8,
+      shadowColor: Colors.black.withValues(alpha: 0.3),
+      surfaceTintColor: Colors.transparent,
+      backgroundColor: AppColors.background,
       actions: actions,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          bottom: Radius.circular(24),
-        ),
-      ),
     );
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight + 10);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }

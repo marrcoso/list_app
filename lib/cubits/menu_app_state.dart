@@ -6,23 +6,30 @@ enum MenuAppDialog { none, taskDetails, taskEdit }
 class MenuAppState extends Equatable {
   final MenuAppDialog dialogType;
   final Task? selectedTask;
+  final List<Task> tasks;
+  final bool isLoading;
 
   const MenuAppState({
     this.dialogType = MenuAppDialog.none,
-    this.selectedTask
+    this.selectedTask,
+    this.tasks = const [],
+    this.isLoading = false,
   });
 
   MenuAppState copyWith({
     MenuAppDialog? dialogType,
     Task? selectedTask,
-    bool? isDialogOpen,
+    List<Task>? tasks,
+    bool? isLoading,
   }) {
     return MenuAppState(
       dialogType: dialogType ?? this.dialogType,
       selectedTask: selectedTask ?? this.selectedTask,
+      tasks: tasks ?? this.tasks,
+      isLoading: isLoading ?? this.isLoading,
     );
   }
 
   @override
-  List<Object?> get props => [dialogType, selectedTask];
+  List<Object?> get props => [dialogType, selectedTask, tasks, isLoading];
 }

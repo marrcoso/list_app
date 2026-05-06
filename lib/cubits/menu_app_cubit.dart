@@ -8,7 +8,15 @@ class MenuAppCubit extends Cubit<MenuAppState> {
   final DatabaseHelper _dbHelper = DatabaseHelper();
   Timer? _debounceTimer;
 
-  MenuAppCubit() : super(const MenuAppState());
+  MenuAppCubit() : super(const MenuAppState()) {
+    loadTasks();
+  }
+
+  Future<void> loadTasks() async {
+    emit(state.copyWith(isLoading: true));
+    final tasks = await _dbHelper.getTasks();
+    emit(state.copyWith(tasks: tasks, isLoading: false));
+  }
 
   void showTaskDetails(Task task) {
     if (state.dialogType != MenuAppDialog.none && state.dialogType != MenuAppDialog.taskDetails) closeDialog();
@@ -71,6 +79,7 @@ class MenuAppCubit extends Cubit<MenuAppState> {
     if (state.selectedTask?.id == null) return;
     await _dbHelper.deleteTask(state.selectedTask!.id!);
     closeDialog();
+    await loadTasks();
   }
 
   void _onTaskChanged({bool immediate = false}) {
@@ -85,6 +94,7 @@ class MenuAppCubit extends Cubit<MenuAppState> {
   Future<void> _saveTask() async {
     if (state.selectedTask != null) {
       await _dbHelper.updateTask(state.selectedTask!);
+      await loadTasks();
     }
   }
 

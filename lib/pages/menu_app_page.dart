@@ -2,7 +2,6 @@ import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:list_app/components/item_list.dart';
-import 'package:list_app/theme/router/router.gr.dart';
 import '../components/custom_app_bar.dart';
 import '../components/custom_button.dart';
 import '../theme/app_colors.dart';
@@ -18,19 +17,39 @@ class MenuAppPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => MenuAppCubit(),
+    return DefaultTabController(
+      length: 4,
       child: Scaffold(
-        appBar: CustomAppBar(
-          title: 'Menu App',
-          actions: [
-            IconButton(
-              onPressed: () => context.router.popAndPush(const WelcomeRoute()),
-              icon: const Icon(Icons.close),
-            ),
-          ],
+        appBar: const CustomAppBar(
+          title: 'Tarefas',
         ),
-        body: MenuPage(),
+        body: const MenuPage(),
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 10,
+                offset: const Offset(0, -2),
+              ),
+            ],
+          ),
+          child: SafeArea(
+            child: TabBar(
+              labelColor: AppColors.primary,
+              unselectedLabelColor: Colors.grey,
+              indicatorColor: AppColors.primary,
+              indicatorWeight: 3,
+              tabs: [
+                Tab(icon: Icon(Icons.list), text: 'Todas'),
+                Tab(icon: Icon(Icons.star), text: 'Import.'),
+                Tab(icon: Icon(Icons.check_circle), text: 'Concl.'),
+                Tab(icon: Icon(Icons.history), text: 'Atras.'),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -44,26 +63,11 @@ class MenuPage extends StatefulWidget {
 }
 
 class _MenuPageState extends State<MenuPage> {
-  final DatabaseHelper _dbHelper = DatabaseHelper();
-  List<Task> _tasks = [];
   bool isDialogOpen = false;
 
   @override
-  void initState() {
-    super.initState();
-    _loadTasks();
-  }
-
-  Future<void> _loadTasks() async {
-    final tasks = await _dbHelper.getTasks();
-    setState(() {
-      _tasks = tasks;
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return BlocListener<MenuAppCubit, MenuAppState>(
+    return BlocConsumer<MenuAppCubit, MenuAppState>(
       listener: (context, state) {
         final cubit = context.read<MenuAppCubit>();
         switch (state.dialogType) {
@@ -74,9 +78,7 @@ class _MenuPageState extends State<MenuPage> {
                 context,
                 state.selectedTask!,
                 cubit,
-              ).then((_) {
-                _loadTasks();
-              });
+              );
             }
             break;
           case MenuAppDialog.taskEdit:
@@ -86,9 +88,7 @@ class _MenuPageState extends State<MenuPage> {
                 context,
                 state.selectedTask!,
                 cubit,
-              ).then((_) {
-                _loadTasks();
-              });
+              );
             }
             break;
           case MenuAppDialog.none:
@@ -99,56 +99,86 @@ class _MenuPageState extends State<MenuPage> {
             break;
         }
       },
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-            child: CustomButton(
-              title: 'Adicionar',
-              icon: Icons.add,
-              backgroundColor: AppColors.primary,
-              onPressed: () async {
-                final newTask = Task(
-                  title: 'Nova Tarefa',
-                  description: 'Insira a descrição aqui...',
-                  dueDate: DateTime.now(),
-                  isImportant: false,
-                  isDone: false,
-                  category: 'Geral',
-                );
-                final id = await _dbHelper.insertTask(newTask);
-                newTask.id = id;
-                if (context.mounted) {
-                  context.read<MenuAppCubit>().showTaskEdit(newTask);
-                }
-              },
-            ),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              child: ListView.builder(
-                itemCount: _tasks.length,
-                itemBuilder: (context, index) {
-                  final task = _tasks[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 8.0),
-                    child: InkWell(
-                      onTap: () {
-                        context.read<MenuAppCubit>().showTaskDetails(task);
-                      },
-                      child: ItemList(
-                        currentTask: task,
-                        backgroundColor: task.isDone ? Colors.grey : null,
-                      ),
-                    ),
+      builder: (context, state) {
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+              child: CustomButton(
+                title: 'Adicionar',
+                icon: Icons.add,
+                backgroundColor: AppColors.primary,
+                onPressed: () async {
+                  final newTask = Task(
+                    title: 'Nova Tarefa',
+                    description: 'Insira a descrição aqui...',
+                    dueDate: DateTime.now(),
+                    isImportant: false,
+                    isDone: false,
+                    category: 'Geral',
                   );
+                  // Em vez de salvar aqui e dar reload, podemos delegar ao Cubit se quisermos,
+                  // ou manter o salvamento manual. Para manter a lógica atual:
+                  final dbHelper = DatabaseHelper();
+                  final id = await dbHelper.insertTask(newTask);
+                  newTask.id = id;
+                  if (context.mounted) {
+                    context.read<MenuAppCubit>().loadTasks(); // Recarrega a lista global
+                    context.read<MenuAppCubit>().showTaskEdit(newTask);
+                  }
                 },
               ),
             ),
-          ),
-        ],
+            Expanded(
+              child: state.isLoading 
+                ? const Center(child: CircularProgressIndicator())
+                : TabBarView(
+                children: [
+                  _buildTaskList(state.tasks),
+                  _buildTaskList(state.tasks.where((t) => t.isImportant).toList()),
+                  _buildTaskList(state.tasks.where((t) => t.isDone).toList()),
+                  _buildTaskList(state.tasks.where((t) {
+                    final isDelayed = t.dueDate.isBefore(DateTime.now()) && !t.isDone;
+                    return isDelayed;
+                  }).toList()),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildTaskList(List<Task> filteredTasks) {
+    if (filteredTasks.isEmpty) {
+      return const Center(
+        child: Text(
+          'Nenhuma tarefa encontrada!',
+          style: TextStyle(color: Colors.grey, fontSize: 16),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: ListView.builder(
+        itemCount: filteredTasks.length,
+        itemBuilder: (context, index) {
+          final task = filteredTasks[index];
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 8.0),
+            child: InkWell(
+              onTap: () {
+                context.read<MenuAppCubit>().showTaskDetails(task);
+              },
+              child: ItemList(
+                currentTask: task,
+                backgroundColor: task.isDone ? Colors.grey : null,
+              ),
+            ),
+          );
+        },
       ),
     );
   }
