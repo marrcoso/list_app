@@ -6,7 +6,6 @@ import '../components/custom_app_bar.dart';
 import '../components/custom_button.dart';
 import '../theme/app_colors.dart';
 import '../models/task.dart';
-import '../database/database_helper.dart';
 import '../cubits/menu_app_cubit.dart';
 import '../cubits/menu_app_state.dart';
 import '../components/app_dialogs.dart';
@@ -108,41 +107,65 @@ class _MenuPageState extends State<MenuPage> {
                 title: 'Adicionar',
                 icon: Icons.add,
                 backgroundColor: AppColors.primary,
-                onPressed: () async {
-                  final newTask = Task(
-                    title: 'Nova Tarefa',
-                    description: 'Insira a descrição aqui...',
-                    dueDate: DateTime.now(),
-                    isImportant: false,
-                    isDone: false,
-                    category: 'Geral',
+                onPressed: () => context.read<MenuAppCubit>().addNewTask(),
+              ),
+            ),
+            Container(
+              height: 50,
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                children: ['Todas', 'Geral', 'Casa', 'Trabalho', 'Outros'].map((category) {
+                  final isSelected = state.selectedCategory == category;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ChoiceChip(
+                      showCheckmark: false,
+                      label: Text(category),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        if (selected) {
+                          context.read<MenuAppCubit>().updateFilterCategory(category);
+                        }
+                      },
+                      selectedColor: AppColors.primary,
+                      labelStyle: TextStyle(
+                        color: isSelected ? Colors.white : AppColors.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        side: const BorderSide(color: AppColors.primary),
+                      ),
+                    ),
                   );
-                  // Em vez de salvar aqui e dar reload, podemos delegar ao Cubit se quisermos,
-                  // ou manter o salvamento manual. Para manter a lógica atual:
-                  final dbHelper = DatabaseHelper();
-                  final id = await dbHelper.insertTask(newTask);
-                  newTask.id = id;
-                  if (context.mounted) {
-                    context.read<MenuAppCubit>().loadTasks(); // Recarrega a lista global
-                    context.read<MenuAppCubit>().showTaskEdit(newTask);
-                  }
-                },
+                }).toList(),
               ),
             ),
             Expanded(
               child: state.isLoading 
                 ? const Center(child: CircularProgressIndicator())
-                : TabBarView(
-                children: [
-                  _buildTaskList(state.tasks),
-                  _buildTaskList(state.tasks.where((t) => t.isImportant).toList()),
-                  _buildTaskList(state.tasks.where((t) => t.isDone).toList()),
-                  _buildTaskList(state.tasks.where((t) {
-                    final isDelayed = t.dueDate.isBefore(DateTime.now()) && !t.isDone;
-                    return isDelayed;
-                  }).toList()),
-                ],
-              ),
+                : Builder(
+                    builder: (context) {
+                      final categoryTasks = state.selectedCategory == 'Todas'
+                          ? state.tasks
+                          : state.tasks.where((t) => t.categoria == state.selectedCategory).toList();
+                      
+                      return TabBarView(
+                        children: [
+                          _buildTaskList(categoryTasks),
+                          _buildTaskList(categoryTasks.where((t) => t.isImportante).toList()),
+                          _buildTaskList(categoryTasks.where((t) => t.isConcluido).toList()),
+                          _buildTaskList(categoryTasks.where((t) {
+                            final isDelayed = t.dataVencimento.isBefore(DateTime.now().subtract(const Duration(days: 1))) && !t.isConcluido;
+                            return isDelayed;
+                          }).toList()),
+                        ],
+                      );
+                    }
+                  ),
             ),
           ],
         );
@@ -174,7 +197,7 @@ class _MenuPageState extends State<MenuPage> {
               },
               child: ItemList(
                 currentTask: task,
-                backgroundColor: task.isDone ? Colors.grey : null,
+                backgroundColor: task.isConcluido ? Colors.grey : Colors.white,
               ),
             ),
           );

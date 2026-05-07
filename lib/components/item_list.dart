@@ -19,36 +19,36 @@ class ItemList extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: backgroundColor,
-        border: Border.all(color: AppColors.onBackground, width: 2),
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       width: double.infinity,
+      height: 80,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Row(
           children: [
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        currentTask.title,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.onBackground,
-                          decoration: currentTask.isDone ? TextDecoration.lineThrough : null,
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.edit, color: AppColors.primary),
-                        onPressed: () => context.read<MenuAppCubit>().showTaskEdit(currentTask),
-                      ),
-                    ],
-                  ),
-                  if (currentTask.isImportant)
+                  Text(
+                    currentTask.titulo,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.onBackground,
+                      decoration: currentTask.isConcluido ? TextDecoration.lineThrough : null,
+                    ),
+                  ), 
+                  if (currentTask.isImportante)
                     Padding(
                       padding: const EdgeInsets.only(top: 4),
                       child: Container(
@@ -73,6 +73,10 @@ class ItemList extends StatelessWidget {
                     ),
                 ],
               ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.edit, color: AppColors.primary),
+              onPressed: () => context.read<MenuAppCubit>().showTaskEdit(currentTask),
             ),
           ],
         ),

@@ -6,7 +6,6 @@ import '../database/database_helper.dart';
 
 class MenuAppCubit extends Cubit<MenuAppState> {
   final DatabaseHelper _dbHelper = DatabaseHelper();
-  Timer? _debounceTimer;
 
   MenuAppCubit() : super(const MenuAppState()) {
     loadTasks();
@@ -18,11 +17,23 @@ class MenuAppCubit extends Cubit<MenuAppState> {
     emit(state.copyWith(tasks: tasks, isLoading: false));
   }
 
+  Future<void> addNewTask() async {
+    final newTask = Task(
+      titulo: '',
+      descricao: '',
+      dataVencimento: DateTime.now(),
+      isImportante: false,
+      isConcluido: false,
+      categoria: 'Geral',
+    );
+    showTaskEdit(newTask);
+  }
+
   void showTaskDetails(Task task) {
     if (state.dialogType != MenuAppDialog.none && state.dialogType != MenuAppDialog.taskDetails) closeDialog();
     emit(state.copyWith(
       dialogType: MenuAppDialog.taskDetails,
-      selectedTask: task,
+      selectedTask: task.copyWith(),
     ));
   }
 
@@ -30,12 +41,11 @@ class MenuAppCubit extends Cubit<MenuAppState> {
     if (state.dialogType != MenuAppDialog.none && state.dialogType != MenuAppDialog.taskEdit) closeDialog();
     emit(state.copyWith(
       dialogType: MenuAppDialog.taskEdit,
-      selectedTask: task,
+      selectedTask: task.copyWith(),
     ));
   }
 
   void closeDialog() {
-    _debounceTimer?.cancel();
     emit(state.copyWith(
       dialogType: MenuAppDialog.none,
       selectedTask: null,
@@ -44,35 +54,44 @@ class MenuAppCubit extends Cubit<MenuAppState> {
 
   void updateTaskTitle(String title) {
     if (state.selectedTask == null) return;
-    state.selectedTask!.title = title;
-    _onTaskChanged();
+    emit(state.copyWith(
+      selectedTask: state.selectedTask!.copyWith(titulo: title),
+    ));
   }
 
   void updateTaskDescription(String description) {
     if (state.selectedTask == null) return;
-    state.selectedTask!.description = description;
-    _onTaskChanged();
+    emit(state.copyWith(
+      selectedTask: state.selectedTask!.copyWith(descricao: description),
+    ));
   }
 
   void updateTaskImportance(bool isImportant) {
     if (state.selectedTask == null) return;
-    state.selectedTask!.isImportant = isImportant;
-    _onTaskChanged(immediate: true);
-    emit(state.copyWith()); // Trigger rebuild
+    emit(state.copyWith(
+      selectedTask: state.selectedTask!.copyWith(isImportante: isImportant),
+    ));
   }
 
   void updateTaskStatus(bool isDone) {
     if (state.selectedTask == null) return;
-    state.selectedTask!.isDone = isDone;
-    _onTaskChanged(immediate: true);
-    emit(state.copyWith()); // Trigger rebuild
+    emit(state.copyWith(
+      selectedTask: state.selectedTask!.copyWith(isConcluido: isDone),
+    ));
   }
 
   void updateTaskDate(DateTime date) {
     if (state.selectedTask == null) return;
-    state.selectedTask!.dueDate = date;
-    _onTaskChanged(immediate: true);
-    emit(state.copyWith()); // Trigger rebuild
+    emit(state.copyWith(
+      selectedTask: state.selectedTask!.copyWith(dataVencimento: date),
+    ));
+  }
+
+  void updateTaskCategory(String category) {
+    if (state.selectedTask == null) return;
+    emit(state.copyWith(
+      selectedTask: state.selectedTask!.copyWith(categoria: category),
+    ));
   }
 
   Future<void> deleteTask() async {
@@ -82,25 +101,20 @@ class MenuAppCubit extends Cubit<MenuAppState> {
     await loadTasks();
   }
 
-  void _onTaskChanged({bool immediate = false}) {
-    _debounceTimer?.cancel();
-    if (immediate) {
-      _saveTask();
+  Future<void> saveSelectedTask() async {
+    if (state.selectedTask == null) return;
+    
+    if (state.selectedTask!.id == null) {
+      await _dbHelper.insertTask(state.selectedTask!);
     } else {
-      _debounceTimer = Timer(const Duration(milliseconds: 500), _saveTask);
-    }
-  }
-
-  Future<void> _saveTask() async {
-    if (state.selectedTask != null) {
       await _dbHelper.updateTask(state.selectedTask!);
-      await loadTasks();
     }
+    
+    closeDialog();
+    await loadTasks();
   }
 
-  @override
-  Future<void> close() {
-    _debounceTimer?.cancel();
-    return super.close();
+  void updateFilterCategory(String category) {
+    emit(state.copyWith(selectedCategory: category));
   }
 }
