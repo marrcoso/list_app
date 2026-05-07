@@ -1,10 +1,17 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:sqflite/sqflite.dart';
 import 'theme/router/router.dart';
 import 'theme/app_colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'cubits/menu_app_cubit.dart';
 
 void main() {
+  if (Platform.isWindows || Platform.isLinux) {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  }
   runApp(MyApp());
 }
 

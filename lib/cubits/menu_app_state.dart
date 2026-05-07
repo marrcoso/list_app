@@ -8,12 +8,14 @@ class MenuAppState extends Equatable {
   final Task? selectedTask;
   final List<Task> tasks;
   final bool isLoading;
+  final String selectedCategory;
 
   const MenuAppState({
     this.dialogType = MenuAppDialog.none,
     this.selectedTask,
     this.tasks = const [],
     this.isLoading = false,
+    this.selectedCategory = 'Todas',
   });
 
   MenuAppState copyWith({
@@ -21,15 +23,17 @@ class MenuAppState extends Equatable {
     Task? selectedTask,
     List<Task>? tasks,
     bool? isLoading,
+    String? selectedCategory,
   }) {
     return MenuAppState(
       dialogType: dialogType ?? this.dialogType,
       selectedTask: selectedTask ?? this.selectedTask,
       tasks: tasks ?? this.tasks,
       isLoading: isLoading ?? this.isLoading,
+      selectedCategory: selectedCategory ?? this.selectedCategory,
     );
   }
 
   @override
-  List<Object?> get props => [dialogType, selectedTask, tasks, isLoading];
+  List<Object?> get props => [dialogType, selectedTask, tasks, isLoading, selectedCategory];
 }

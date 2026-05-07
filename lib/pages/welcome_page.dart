@@ -32,9 +32,9 @@ class _WelcomePageState extends State<WelcomePage> {
   Future<void> _findUrgentTask() async {
     final tasks = await _dbHelper.getTasks();
     
-    final pendingTasks = tasks.where((t) => !t.isDone).toList();
+    final pendingTasks = tasks.where((t) => !t.isConcluido).toList();
     if (pendingTasks.isNotEmpty) {
-      pendingTasks.sort((a, b) => a.dueDate.compareTo(b.dueDate));
+      pendingTasks.sort((a, b) => a.dataVencimento.compareTo(b.dataVencimento));
       _urgentTask = pendingTasks.first;
     }
   }
@@ -132,7 +132,7 @@ class _WelcomePageState extends State<WelcomePage> {
   Widget _buildUrgentTaskCard() {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(24),
@@ -156,22 +156,23 @@ class _WelcomePageState extends State<WelcomePage> {
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          Text(
-            _urgentTask!.title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Text(
+              _urgentTask!.titulo,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-          const SizedBox(height: 12),
           Row(
             children: [
               const Icon(Icons.calendar_today, color: Colors.white70, size: 16),
               const SizedBox(width: 8),
               Text(
-                'Vence em: ${_urgentTask!.dueDate.day}/${_urgentTask!.dueDate.month}/${_urgentTask!.dueDate.year}',
+                'Vence em: ${_urgentTask!.dataVencimento.day}/${_urgentTask!.dataVencimento.month}/${_urgentTask!.dataVencimento.year}',
                 style: const TextStyle(
                   color: Colors.white70,
                   fontSize: 16,
@@ -179,7 +180,7 @@ class _WelcomePageState extends State<WelcomePage> {
               ),
             ],
           ),
-          if (_urgentTask!.isImportant)
+          if (_urgentTask!.isImportante)
             Padding(
               padding: const EdgeInsets.only(top: 16),
               child: Container(
