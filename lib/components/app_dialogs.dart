@@ -27,187 +27,193 @@ class AppDialogs {
                   return Dialog(
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     child: Container(
-                      width: MediaQuery.of(context).size.width * 0.8,
-                      height: MediaQuery.of(context).size.height * 0.8,
+                      width: MediaQuery.of(context).size.width * 0.9,
                       padding: const EdgeInsets.all(16),
-                        child: Column(
-                          children: [
-                            Column(
-                              children: [
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    IconButton(
-                                      icon: const Icon(Icons.close, color: AppColors.onBackground),
-                                      onPressed: () => cubit.closeDialog(),
-                                    ),
-                                    Text(
-                                      task.titulo.isEmpty ? 'Nova Tarefa' : 'Editar Tarefa',
-                                      style: const TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColors.primary,
-                                      ),
-                                    ),
-                                    IconButton(
-                                      icon: const Icon(Icons.delete, color: AppColors.error),
-                                      onPressed: () => cubit.deleteTask(),
-                                    ),
-                                  ],
-                                ),
-                                const Divider(),
-                              ],
-                            ),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                Text(
-                                  'ID: ${currentTask.id ?? "Novo"}',
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: AppColors.onBackground,
-                              ),
-                            ),
-                            TextFormField(
-                              initialValue: currentTask.titulo,
-                              decoration: const InputDecoration(
-                                labelText: 'Título',
-                                hintText: 'Ex: Comprar mantimentos',
-                                labelStyle: TextStyle(color: AppColors.primary),
-                                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppColors.primary)),
-                              ),
-                              autovalidateMode: AutovalidateMode.onUserInteraction,
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'O título é obrigatório';
-                                }
-                                return null;
-                              },
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.onBackground,
-                              ),
-                              onChanged: (value) => cubit.updateTaskTitle(value),
-                            ),
-                            Row(
-                              children: [
-                                Checkbox(
-                                  value: currentTask.isImportante,
-                                  activeColor: AppColors.primary,
-                                  shape: const CircleBorder(),
-                                  onChanged: (value) => cubit.updateTaskImportance(value ?? false),
-                                ),
-                                const Text('Marcar como importante'),
-                              ],
-                            ),
-                            DropdownButtonFormField<String>(
-                              initialValue: ['Geral', 'Casa', 'Trabalho', 'Outros'].contains(currentTask.categoria) 
-                                  ? currentTask.categoria 
-                                  : 'Geral',
-                              decoration: const InputDecoration(
-                                labelText: 'Categoria',
-                                labelStyle: TextStyle(color: AppColors.primary),
-                                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppColors.primary)),
-                              ),
-                              items: ['Geral', 'Casa', 'Trabalho', 'Outros'].map((String category) {
-                                return DropdownMenuItem<String>(
-                                  value: category,
-                                  child: Text(category),
-                                );
-                              }).toList(),
-                              onChanged: (String? newValue) {
-                                if (newValue != null) {
-                                  cubit.updateTaskCategory(newValue);
-                                }
-                              },
-                            ),
-                            TextFormField(
-                              initialValue: currentTask.descricao,
-                              decoration: const InputDecoration(
-                                labelText: 'Descrição',
-                                hintText: 'Ex: Ir ao mercado no sábado de manhã...',
-                                labelStyle: TextStyle(color: AppColors.primary),
-                                enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppColors.primary)),
-                              ),
-                              maxLines: 2,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: AppColors.onBackground,
-                              ),
-                              onChanged: (value) => cubit.updateTaskDescription(value),
-                            ),
-                            InkWell(
-                              onTap: () async {
-                                final DateTime? picked = await showDatePicker(
-                                  context: context,
-                                  initialDate: currentTask.dataVencimento,
-                                  firstDate: DateTime(2000),
-                                  lastDate: DateTime(2101),
-                                  builder: (context, child) {
-                                    return Theme(
-                                      data: Theme.of(context).copyWith(
-                                        colorScheme: const ColorScheme.light(
-                                          primary: AppColors.primary,
-                                          onPrimary: Colors.white,
-                                          onSurface: AppColors.onBackground,
-                                        ),
-                                      ),
-                                      child: child!,
-                                    );
-                                  },
-                                );
-                                if (picked != null) {
-                                  cubit.updateTaskDate(picked);
-                                }
-                              },
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.calendar_today, size: 16, color: AppColors.primary),
-                                  const SizedBox(width: 8),
+                                  IconButton(
+                                    icon: const Icon(Icons.close, color: AppColors.onBackground),
+                                    onPressed: () => cubit.closeDialog(),
+                                  ),
                                   Text(
-                                    'Data: ${currentTask.dataVencimento.day}/${currentTask.dataVencimento.month}/${currentTask.dataVencimento.year}',
+                                    task.titulo.isEmpty ? 'Nova Tarefa' : 'Editar Tarefa',
                                     style: const TextStyle(
-                                      fontSize: 14,
-                                      color: AppColors.onBackground,
-                                      decoration: TextDecoration.underline,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColors.primary,
                                     ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.delete, color: AppColors.error),
+                                    onPressed: () => cubit.deleteTask(),
                                   ),
                                 ],
                               ),
-                            ),
-                            if (currentTask.titulo.trim().isEmpty)
-                              const Padding(
-                                padding: EdgeInsets.only(bottom: 8.0),
-                                child: Text(
-                                  'O título é obrigatório para salvar.',
-                                  style: TextStyle(color: AppColors.error, fontSize: 12),
+                              const Divider(),
+                            ],
+                          ),
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 16),
+                              Text(
+                                'ID: ${currentTask.id ?? "Novo"}',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.onBackground,
                                 ),
                               ),
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  if (currentTask.titulo.trim().isEmpty) {
-                                    setDialogState(() {});
-                                    return;
+                              const SizedBox(height: 12),
+                              TextFormField(
+                                initialValue: currentTask.titulo,
+                                decoration: const InputDecoration(
+                                  labelText: 'Título',
+                                  hintText: 'Ex: Comprar mantimentos',
+                                  labelStyle: TextStyle(color: AppColors.primary),
+                                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppColors.primary)),
+                                ),
+                                autovalidateMode: AutovalidateMode.onUserInteraction,
+                                validator: (value) {
+                                  if (value == null || value.trim().isEmpty) {
+                                    return 'O título é obrigatório';
                                   }
-                                  cubit.saveSelectedTask();
+                                  return null;
                                 },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primary,
-                                  foregroundColor: Colors.white,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.onBackground,
                                 ),
-                                child: const Text('Salvar e Fechar'),
+                                onChanged: (value) => cubit.updateTaskTitle(value),
                               ),
-                            ),
-                          ],
-                        ),
-                            ),
-                          ],
-                        ),
+                              const SizedBox(height: 12),
+                              Row(
+                                children: [
+                                  Checkbox(
+                                    value: currentTask.isImportante,
+                                    activeColor: AppColors.primary,
+                                    shape: const CircleBorder(),
+                                    onChanged: (value) => cubit.updateTaskImportance(value ?? false),
+                                  ),
+                                  const Text('Marcar como importante'),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              DropdownButtonFormField<String>(
+                                initialValue: ['Geral', 'Casa', 'Trabalho', 'Outros'].contains(currentTask.categoria) 
+                                    ? currentTask.categoria 
+                                    : 'Geral',
+                                decoration: const InputDecoration(
+                                  labelText: 'Categoria',
+                                  labelStyle: TextStyle(color: AppColors.primary),
+                                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppColors.primary)),
+                                ),
+                                items: ['Geral', 'Casa', 'Trabalho', 'Outros'].map((String category) {
+                                  return DropdownMenuItem<String>(
+                                    value: category,
+                                    child: Text(category),
+                                  );
+                                }).toList(),
+                                onChanged: (String? newValue) {
+                                  if (newValue != null) {
+                                    cubit.updateTaskCategory(newValue);
+                                  }
+                                },
+                              ),
+                              const SizedBox(height: 12),
+                              TextFormField(
+                                initialValue: currentTask.descricao,
+                                decoration: const InputDecoration(
+                                  labelText: 'Descrição',
+                                  hintText: 'Ex: Ir ao mercado no sábado de manhã...',
+                                  labelStyle: TextStyle(color: AppColors.primary),
+                                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: AppColors.primary)),
+                                ),
+                                maxLines: 2,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: AppColors.onBackground,
+                                ),
+                                onChanged: (value) => cubit.updateTaskDescription(value),
+                              ),
+                              const SizedBox(height: 16),
+                              InkWell(
+                                onTap: () async {
+                                  final DateTime? picked = await showDatePicker(
+                                    context: context,
+                                    initialDate: currentTask.dataVencimento,
+                                    firstDate: DateTime(2000),
+                                    lastDate: DateTime(2101),
+                                    builder: (context, child) {
+                                      return Theme(
+                                        data: Theme.of(context).copyWith(
+                                          colorScheme: const ColorScheme.light(
+                                            primary: AppColors.primary,
+                                            onPrimary: Colors.white,
+                                            onSurface: AppColors.onBackground,
+                                          ),
+                                        ),
+                                        child: child!,
+                                      );
+                                    },
+                                  );
+                                  if (picked != null) {
+                                    cubit.updateTaskDate(picked);
+                                  }
+                                },
+                                child: Row(
+                                  children: [
+                                    const Icon(Icons.calendar_today, size: 16, color: AppColors.primary),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      'Data: ${currentTask.dataVencimento.day}/${currentTask.dataVencimento.month}/${currentTask.dataVencimento.year}',
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: AppColors.onBackground,
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 24),
+                              if (currentTask.titulo.trim().isEmpty)
+                                const Padding(
+                                  padding: EdgeInsets.only(bottom: 8.0),
+                                  child: Text(
+                                    'O título é obrigatório para salvar.',
+                                    style: TextStyle(color: AppColors.error, fontSize: 12),
+                                  ),
+                                ),
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    if (currentTask.titulo.trim().isEmpty) {
+                                      setDialogState(() {});
+                                      return;
+                                    }
+                                    cubit.saveSelectedTask();
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.primary,
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  child: const Text('Salvar e Fechar'),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 },
@@ -240,7 +246,7 @@ class AppDialogs {
                   return Dialog(
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     child: Container(
-                      width: MediaQuery.of(context).size.width * 0.7,
+                      width: MediaQuery.of(context).size.width * 0.9,
                       padding: const EdgeInsets.all(16),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,

@@ -47,6 +47,7 @@ class ItemList extends StatelessWidget {
                       color: AppColors.onBackground,
                       decoration: currentTask.isConcluido ? TextDecoration.lineThrough : null,
                     ),
+                    overflow: TextOverflow.ellipsis,
                   ), 
                   if (currentTask.isImportante)
                     Padding(
