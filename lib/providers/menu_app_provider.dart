@@ -1,14 +1,22 @@
 import 'dart:async';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/foundation.dart';
 import '../models/task.dart';
 import 'menu_app_state.dart';
 import '../database/database_helper.dart';
 
-class MenuAppCubit extends Cubit<MenuAppState> {
+class MenuAppProvider extends ChangeNotifier {
   final DatabaseHelper _dbHelper = DatabaseHelper();
+  
+  MenuAppState _state = const MenuAppState();
+  MenuAppState get state => _state;
 
-  MenuAppCubit() : super(const MenuAppState()) {
+  MenuAppProvider() {
     loadTasks();
+  }
+
+  void emit(MenuAppState newState) {
+    _state = newState;
+    notifyListeners();
   }
 
   Future<void> loadTasks() async {

@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import '../models/task.dart';
 import '../theme/app_colors.dart';
-import '../cubits/menu_app_cubit.dart';
-import '../cubits/menu_app_state.dart';
+import '../providers/menu_app_provider.dart';
 
 class AppDialogs {
-  static Future<void> showTaskEditDialog(BuildContext context, Task task, MenuAppCubit cubit) async {
+  static Future<void> showTaskEditDialog(BuildContext context, Task task, MenuAppProvider provider) async {
     return showDialog(
       context: context,
       builder: (context) => PopScope(
@@ -16,11 +15,11 @@ class AppDialogs {
             return;
           }
         },
-        child: BlocProvider.value(
-          value: cubit,
-          child: BlocBuilder<MenuAppCubit, MenuAppState>(
-            builder: (context, state) {
-              final currentTask = state.selectedTask ?? task;
+        child: ChangeNotifierProvider.value(
+          value: provider,
+          child: Consumer<MenuAppProvider>(
+            builder: (context, providerObj, child) {
+              final currentTask = providerObj.state.selectedTask ?? task;
               
               return StatefulBuilder(
                 builder: (context, setDialogState) {
@@ -40,7 +39,7 @@ class AppDialogs {
                                 children: [
                                   IconButton(
                                     icon: const Icon(Icons.close, color: AppColors.onBackground),
-                                    onPressed: () => cubit.closeDialog(),
+                                    onPressed: () => provider.closeDialog(),
                                   ),
                                   Text(
                                     task.titulo.isEmpty ? 'Nova Tarefa' : 'Editar Tarefa',
@@ -52,7 +51,7 @@ class AppDialogs {
                                   ),
                                   IconButton(
                                     icon: const Icon(Icons.delete, color: AppColors.error),
-                                    onPressed: () => cubit.deleteTask(),
+                                    onPressed: () => provider.deleteTask(),
                                   ),
                                 ],
                               ),
@@ -96,7 +95,7 @@ class AppDialogs {
                                       fontWeight: FontWeight.bold,
                                       color: AppColors.onBackground,
                                     ),
-                                    onChanged: (value) => cubit.updateTaskTitle(value),
+                                    onChanged: (value) => provider.updateTaskTitle(value),
                                   ),
                                   const SizedBox(height: 12),
                                   Row(
@@ -105,7 +104,7 @@ class AppDialogs {
                                         value: currentTask.isImportante,
                                         activeColor: AppColors.primary,
                                         shape: const CircleBorder(),
-                                        onChanged: (value) => cubit.updateTaskImportance(value ?? false),
+                                        onChanged: (value) => provider.updateTaskImportance(value ?? false),
                                       ),
                                       const Text('Marcar como importante'),
                                     ],
@@ -128,7 +127,7 @@ class AppDialogs {
                                     }).toList(),
                                     onChanged: (String? newValue) {
                                       if (newValue != null) {
-                                        cubit.updateTaskCategory(newValue);
+                                        provider.updateTaskCategory(newValue);
                                       }
                                     },
                                   ),
@@ -146,7 +145,7 @@ class AppDialogs {
                                       fontSize: 14,
                                       color: AppColors.onBackground,
                                     ),
-                                    onChanged: (value) => cubit.updateTaskDescription(value),
+                                    onChanged: (value) => provider.updateTaskDescription(value),
                                   ),
                                   const SizedBox(height: 16),
                                   InkWell(
@@ -170,7 +169,7 @@ class AppDialogs {
                                         },
                                       );
                                       if (picked != null) {
-                                        cubit.updateTaskDate(picked);
+                                        provider.updateTaskDate(picked);
                                       }
                                     },
                                     child: Row(
@@ -205,7 +204,7 @@ class AppDialogs {
                                           setDialogState(() {});
                                           return;
                                         }
-                                        cubit.saveSelectedTask();
+                                        provider.saveSelectedTask();
                                       },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: AppColors.primary,
@@ -231,7 +230,7 @@ class AppDialogs {
     );
   }
 
-  static Future<void> showTaskDetailsDialog(BuildContext context, Task task, MenuAppCubit cubit) async {
+  static Future<void> showTaskDetailsDialog(BuildContext context, Task task, MenuAppProvider provider) async {
     return showDialog(
       context: context,
       builder: (context) => PopScope(
@@ -241,11 +240,11 @@ class AppDialogs {
             return;
           }
         },
-        child: BlocProvider.value(
-          value: cubit,
-          child: BlocBuilder<MenuAppCubit, MenuAppState>(
-            builder: (context, state) {
-              final currentTask = state.selectedTask ?? task;
+        child: ChangeNotifierProvider.value(
+          value: provider,
+          child: Consumer<MenuAppProvider>(
+            builder: (context, providerObj, child) {
+              final currentTask = providerObj.state.selectedTask ?? task;
               
               return StatefulBuilder(
                 builder: (context, setDialogState) {
@@ -265,7 +264,7 @@ class AppDialogs {
                                 children: [
                                   IconButton(
                                     icon: const Icon(Icons.close, color: AppColors.primary),
-                                    onPressed: () => cubit.closeDialog(),
+                                    onPressed: () => provider.closeDialog(),
                                   ),
                                   const Text(
                                     'Detalhes da Tarefa',
@@ -277,7 +276,7 @@ class AppDialogs {
                                   ),
                                   IconButton(
                                     icon: const Icon(Icons.edit, color: AppColors.primary),
-                                    onPressed: () => cubit.showTaskEdit(currentTask),
+                                    onPressed: () => provider.showTaskEdit(currentTask),
                                   ),
                                 ],
                               ),
@@ -352,7 +351,7 @@ class AppDialogs {
                                   Switch(
                                     value: currentTask.isConcluido,
                                     activeThumbColor: AppColors.primary,
-                                    onChanged: (value) => cubit.updateTaskStatus(value),
+                                    onChanged: (value) => provider.updateTaskStatus(value),
                                   ),
                                 ],
                               ),
@@ -360,7 +359,7 @@ class AppDialogs {
                               SizedBox(
                                 width: double.infinity,
                                 child: ElevatedButton(
-                                  onPressed: () => cubit.saveSelectedTask(),
+                                  onPressed: () => provider.saveSelectedTask(),
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: AppColors.primary,
                                     foregroundColor: Colors.white,

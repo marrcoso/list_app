@@ -1,13 +1,13 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:list_app/components/item_list.dart';
 import '../components/custom_app_bar.dart';
 import '../components/custom_button.dart';
 import '../theme/app_colors.dart';
 import '../models/task.dart';
-import '../cubits/menu_app_cubit.dart';
-import '../cubits/menu_app_state.dart';
+import '../providers/menu_app_provider.dart';
+import '../providers/menu_app_state.dart';
 import '../components/app_dialogs.dart';
 
 @RoutePage()
@@ -23,34 +23,38 @@ class MenuAppPage extends StatelessWidget {
           title: 'Tarefas',
         ),
         body: const MenuPage(),
-        bottomNavigationBar: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 10,
-                offset: const Offset(0, -2),
-              ),
-            ],
-          ),
-          child: SafeArea(
-            child: TabBar(
-              labelColor: AppColors.primary,
-              unselectedLabelColor: Colors.grey,
-              indicatorColor: AppColors.primary,
-              indicatorWeight: 3,
-              tabs: [
-                Tab(icon: Icon(Icons.list), text: 'Todas'),
-                Tab(icon: Icon(Icons.star), text: 'Import.'),
-                Tab(icon: Icon(Icons.check_circle), text: 'Concl.'),
-                Tab(icon: Icon(Icons.history), text: 'Atras.'),
-              ],
-            ),
-          ),
-        ),
+        bottomNavigationBar: tabBar(context),
       ),
     );
+  }
+
+  Container tabBar(BuildContext context) {
+    return Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 10,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: SafeArea(
+          child: TabBar(
+            labelColor: AppColors.primary,
+            unselectedLabelColor: Colors.grey,
+            indicatorColor: AppColors.primary,
+            indicatorWeight: 3,
+            tabs: [
+              Tab(icon: Icon(Icons.list), text: 'Todas'),
+              Tab(icon: Icon(Icons.star), text: 'Import.'),
+              Tab(icon: Icon(Icons.check_circle), text: 'Concl.'),
+              Tab(icon: Icon(Icons.history), text: 'Atras.'),
+            ],
+          ),
+        ),
+      );
   }
 }
 
@@ -63,42 +67,63 @@ class MenuPage extends StatefulWidget {
 
 class _MenuPageState extends State<MenuPage> {
   bool isDialogOpen = false;
+  MenuAppProvider? _provider;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final provider = Provider.of<MenuAppProvider>(context, listen: false);
+    if (_provider != provider) {
+      _provider?.removeListener(_onProviderChange);
+      _provider = provider;
+      _provider?.addListener(_onProviderChange);
+    }
+  }
+
+  @override
+  void dispose() {
+    _provider?.removeListener(_onProviderChange);
+    super.dispose();
+  }
+
+  void _onProviderChange() {
+    if (!mounted) return;
+    final state = _provider!.state;
+    switch (state.dialogType) {
+      case MenuAppDialog.taskDetails:
+        if (!isDialogOpen) {
+          isDialogOpen = true;
+          AppDialogs.showTaskDetailsDialog(
+            context,
+            state.selectedTask!,
+            _provider!,
+          );
+        }
+        break;
+      case MenuAppDialog.taskEdit:
+        if (!isDialogOpen) {
+          isDialogOpen = true;
+          AppDialogs.showTaskEditDialog(
+            context,
+            state.selectedTask!,
+            _provider!,
+          );
+        }
+        break;
+      case MenuAppDialog.none:
+        if (isDialogOpen) {
+          isDialogOpen = false;
+          context.router.pop();
+        }
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<MenuAppCubit, MenuAppState>(
-      listener: (context, state) {
-        final cubit = context.read<MenuAppCubit>();
-        switch (state.dialogType) {
-          case MenuAppDialog.taskDetails:
-            if (!isDialogOpen) {
-              isDialogOpen = true;
-              AppDialogs.showTaskDetailsDialog(
-                context,
-                state.selectedTask!,
-                cubit,
-              );
-            }
-            break;
-          case MenuAppDialog.taskEdit:
-            if (!isDialogOpen) {
-              isDialogOpen = true;
-              AppDialogs.showTaskEditDialog(
-                context,
-                state.selectedTask!,
-                cubit,
-              );
-            }
-            break;
-          case MenuAppDialog.none:
-            if (isDialogOpen) {
-              isDialogOpen = false;
-              context.router.pop();
-            }
-            break;
-        }
-      },
-      builder: (context, state) {
+    return Consumer<MenuAppProvider>(
+      builder: (context, provider, child) {
+        final state = provider.state;
         return Column(
           children: [
             Padding(
@@ -107,7 +132,7 @@ class _MenuPageState extends State<MenuPage> {
                 title: 'Adicionar',
                 icon: Icons.add,
                 backgroundColor: AppColors.primary,
-                onPressed: () => context.read<MenuAppCubit>().addNewTask(),
+                onPressed: () => context.read<MenuAppProvider>().addNewTask(),
               ),
             ),
             Container(
@@ -126,7 +151,7 @@ class _MenuPageState extends State<MenuPage> {
                       selected: isSelected,
                       onSelected: (selected) {
                         if (selected) {
-                          context.read<MenuAppCubit>().updateFilterCategory(category);
+                          context.read<MenuAppProvider>().updateFilterCategory(category);
                         }
                       },
                       selectedColor: AppColors.primary,
@@ -193,7 +218,7 @@ class _MenuPageState extends State<MenuPage> {
             padding: const EdgeInsets.only(bottom: 8.0),
             child: InkWell(
               onTap: () {
-                context.read<MenuAppCubit>().showTaskDetails(task);
+                context.read<MenuAppProvider>().showTaskDetails(task);
               },
               child: ItemList(
                 currentTask: task,

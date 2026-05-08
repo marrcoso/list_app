@@ -1,8 +1,8 @@
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:list_app/cubits/menu_app_cubit.dart';
-import 'package:list_app/cubits/menu_app_state.dart';
+import 'package:provider/provider.dart';
+import 'package:list_app/providers/menu_app_provider.dart';
+
 import 'package:list_app/models/task.dart';
 import 'package:list_app/theme/app_colors.dart';
 import 'package:list_app/theme/router/router.gr.dart';
@@ -21,8 +21,9 @@ class _WelcomePageState extends State<WelcomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocBuilder<MenuAppCubit, MenuAppState>(
-        builder: (context, state) {
+      body: Consumer<MenuAppProvider>(
+        builder: (context, provider, child) {
+          final state = provider.state;
           Task? urgentTask;
           final pendingTasks = state.tasks.where((t) => !t.isConcluido).toList();
           

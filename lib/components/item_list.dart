@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:list_app/cubits/menu_app_cubit.dart';
+import 'package:provider/provider.dart';
+import 'package:list_app/providers/menu_app_provider.dart';
 import 'package:list_app/theme/app_colors.dart';
 import 'package:list_app/models/task.dart';
 
@@ -77,7 +77,7 @@ class ItemList extends StatelessWidget {
             ),
             IconButton(
               icon: const Icon(Icons.edit, color: AppColors.primary),
-              onPressed: () => context.read<MenuAppCubit>().showTaskEdit(currentTask),
+              onPressed: () => context.read<MenuAppProvider>().showTaskEdit(currentTask),
             ),
           ],
         ),
